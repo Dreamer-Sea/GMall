@@ -1,11 +1,10 @@
 package com.example.gmall.user;
 
-
 import org.junit.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class GmallUserApplicationTests {
+class GmallUserWebApplicationTests {
 
     @Test
     void contextLoads() {

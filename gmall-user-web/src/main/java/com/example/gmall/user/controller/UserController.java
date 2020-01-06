@@ -1,5 +1,6 @@
 package com.example.gmall.user.controller;
 
+import com.alibaba.dubbo.config.annotation.Reference;
 import com.example.gmall.bean.UmsMember;
 import com.example.gmall.bean.UmsMemberReceiveAddress;
 import com.example.gmall.service.UserService;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @Controller
 public class UserController {
-    @Autowired
+    @Reference
     UserService userService;
 
     @RequestMapping("/getReceiveAddressByMemberId")
