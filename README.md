@@ -1,12 +1,7 @@
 # GMall
 商城
 
-# 开发过程中遇到的问题
-1. Spring Boot 2.2.2-release与tk.mapper 1.2.3存在兼容问题，将tk.mapper改为2.1.5后解决。
-2. Spring Boot 2.2.2-release与dubbo 2.6.0存在兼容问题.为了后续项目的开发，将Spring Boot的版本改为1.5.21-release。tk.mapper也改回1.2.3版本。
-3. 使用dubbo后，想要收到心跳的话，就需要将service的实现类(XXXServiceImpl)中的@Service注解，改为dubbo包中的@Service注解。
-4. bean中的类都要实现Serializable接口。
-
+# 各个模块的说明
 ## gmall-user 用户服务
 端口号：8080
 主流框架必有的包：controller，service，mapper，bean；mapper需要配置对应的xml映射文件(*Mapper.xml)。
@@ -36,3 +31,14 @@
 
 ## gmall-user-web 用户服务的web层
 端口8080
+
+## gmall-manage-service
+端口8071
+
+## gmall-manage-web
+端口8081
+
+## gmall-admin前端界面(由他人开发)
+其中conf文件夹配置前端服务的ip，以及前端访问数据的后端的服务的ip地址。
+dev.env.js 前端访问后端的数据服务的地址。
+index.js 前端的服务器端口。
