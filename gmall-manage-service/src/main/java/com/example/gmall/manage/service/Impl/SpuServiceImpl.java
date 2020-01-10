@@ -21,4 +21,6 @@ public class SpuServiceImpl implements SpuService {
         List<PmsProductInfo> pmsProductInfos = pmsProductInfoMapper.select(pmsProductInfo);
         return pmsProductInfos;
     }
+
+
 }

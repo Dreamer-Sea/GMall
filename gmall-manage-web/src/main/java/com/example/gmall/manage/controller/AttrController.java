@@ -1,8 +1,7 @@
 package com.example.gmall.manage.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
-import com.example.gmall.bean.PmsBaseAttrInfo;
-import com.example.gmall.bean.PmsBaseAttrValue;
+import com.example.gmall.bean.*;
 import com.example.gmall.service.AttrService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -18,6 +17,14 @@ public class AttrController {
 
     @Reference
     AttrService attrService;
+
+    @RequestMapping("baseSaleAttrList")
+    @ResponseBody
+    public List<PmsBaseSaleAttr> baseSaleAttrList(){
+        List<PmsBaseSaleAttr> pmsBaseSaleAttrs = attrService.baseSaleAttrList();
+        return pmsBaseSaleAttrs;
+    }
+
 
     @RequestMapping("attrInfoList")
     @ResponseBody
