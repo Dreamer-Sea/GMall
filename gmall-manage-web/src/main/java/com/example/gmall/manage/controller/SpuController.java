@@ -5,6 +5,7 @@ import com.example.gmall.bean.PmsProductInfo;
 import com.example.gmall.service.SpuService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -16,6 +17,13 @@ public class SpuController {
 
     @Reference
     SpuService spuService;
+
+    @RequestMapping("saveSpuInfo")
+    @ResponseBody
+    public String saveSpuInfo(@RequestBody PmsProductInfo pmsProductInfo){
+
+        return "success";
+    }
 
     @RequestMapping("spuList")
     @ResponseBody
