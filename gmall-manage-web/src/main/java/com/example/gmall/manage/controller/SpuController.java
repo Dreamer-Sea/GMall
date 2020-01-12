@@ -4,10 +4,8 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.example.gmall.bean.PmsProductInfo;
 import com.example.gmall.service.SpuService;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,6 +15,13 @@ public class SpuController {
 
     @Reference
     SpuService spuService;
+
+    @RequestMapping("fileUpload")
+    @ResponseBody
+    public String fileUpload(@RequestParam("file") MultipartFile multipartFile){
+
+        return "success";
+    }
 
     @RequestMapping("saveSpuInfo")
     @ResponseBody
