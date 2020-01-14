@@ -10,7 +10,9 @@ import com.example.gmall.manage.mapper.PmsSkuImageMapper;
 import com.example.gmall.manage.mapper.PmsSkuInfoMapper;
 import com.example.gmall.manage.mapper.PmsSkuSaleAttrValueMapper;
 import com.example.gmall.service.SkuService;
+import com.example.gmall.util.RedisUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import redis.clients.jedis.Jedis;
 
 import java.util.List;
 
@@ -28,6 +30,9 @@ public class SkuServiceImpl implements SkuService {
 
     @Autowired
     PmsSkuImageMapper pmsSkuImageMapper;
+
+    @Autowired
+    RedisUtil redisUtil;
 
     @Override
     public void saveSkuInfo(PmsSkuInfo pmsSkuInfo) {
@@ -57,8 +62,7 @@ public class SkuServiceImpl implements SkuService {
         }
     }
 
-    @Override
-    public PmsSkuInfo getSkuById(String skuId) {
+    public PmsSkuInfo getSkuByIdFromDb(String skuId){
         PmsSkuInfo pmsSkuInfo = new PmsSkuInfo();
         pmsSkuInfo.setId(skuId);
 
@@ -69,5 +73,29 @@ public class SkuServiceImpl implements SkuService {
         List<PmsSkuImage> pmsSkuImages = pmsSkuImageMapper.select(pmsSkuImage);
         skuInfo.setSkuImageList(pmsSkuImages);
         return skuInfo;
+    }
+
+    @Override
+    public PmsSkuInfo getSkuById(String skuId) {
+        PmsSkuInfo pmsSkuInfo = new PmsSkuInfo();
+
+        // 连接缓存
+        Jedis jedis = redisUtil.getJedis();
+
+        // 查询缓存
+
+        // 如果缓存中没有，查询MySQL
+
+        // MySQL查询结果存入Redis
+
+        return pmsSkuInfo;
+    }
+
+    @Override
+    public List<PmsSkuInfo> getSkuSaleAttrValueListBySpu(String productId) {
+
+        List<PmsSkuInfo> pmsSkuInfos = pmsSkuInfoMapper.selectSkuSaleAttrValueListBySpu(productId);
+
+        return pmsSkuInfos;
     }
 }
