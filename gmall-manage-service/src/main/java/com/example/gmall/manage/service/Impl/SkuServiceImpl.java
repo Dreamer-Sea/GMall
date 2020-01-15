@@ -1,6 +1,7 @@
 package com.example.gmall.manage.service.Impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.example.gmall.bean.PmsSkuAttrValue;
 import com.example.gmall.bean.PmsSkuImage;
 import com.example.gmall.bean.PmsSkuInfo;
@@ -11,6 +12,7 @@ import com.example.gmall.manage.mapper.PmsSkuInfoMapper;
 import com.example.gmall.manage.mapper.PmsSkuSaleAttrValueMapper;
 import com.example.gmall.service.SkuService;
 import com.example.gmall.util.RedisUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.Jedis;
 
@@ -83,11 +85,39 @@ public class SkuServiceImpl implements SkuService {
         Jedis jedis = redisUtil.getJedis();
 
         // 查询缓存
+        String skuKey = "sku:" + skuId + ":info";
+        String skuJson = jedis.get(skuKey);
 
-        // 如果缓存中没有，查询MySQL
+        if (StringUtils.isNoneBlank(skuJson)){
+            pmsSkuInfo = JSON.parseObject(skuJson, PmsSkuInfo.class);
+        }else{
+            // 如果缓存中没有，查询MySQL
 
-        // MySQL查询结果存入Redis
+            // 设置分布式锁
+            String OK = jedis.set("sku:" + skuId + ":info", "1", "nx", "px", 10);
+            if (StringUtils.isNoneBlank(OK) && OK.equals("OK")){
+                // 设置成功， 有权在10秒的过期时间内访问数据库
+                pmsSkuInfo = getSkuByIdFromDb(skuId);
+                if (pmsSkuInfo != null){
+                    // MySQL查询结果存入Redis
+                    jedis.set("sku:"+skuId+":info", JSON.toJSONString(pmsSkuInfo));
+                }else{
+                    // 防止缓存穿透
+                    jedis.setex("sku:"+skuId+":info", 60 * 3, JSON.toJSONString(""));
+                }
+            }else{
+                // 设置失败
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return getSkuById(skuId);
+            }
 
+
+        }
+        jedis.close();
         return pmsSkuInfo;
     }
 
