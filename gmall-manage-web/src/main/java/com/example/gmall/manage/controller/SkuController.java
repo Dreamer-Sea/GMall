@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.List;
+
 @Controller
 @CrossOrigin
 public class SkuController {
@@ -33,5 +35,12 @@ public class SkuController {
         skuService.saveSkuInfo(pmsSkuInfo);
 
         return "success";
+    }
+
+    @RequestMapping("getAllSku")
+    @ResponseBody
+    public void getAllSku(){
+        List<PmsSkuInfo> pmsSkuInfos = skuService.getAllSku();
+        System.out.println();
     }
 }
