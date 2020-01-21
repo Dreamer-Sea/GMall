@@ -35,6 +35,33 @@ public class GmallSearchServiceApplicationTests {
 
     @Test
     public void contextLoads() throws IOException {
+        put();
+    }
+
+    public void put() throws IOException {
+        // 查询mysql数据
+        List<PmsSkuInfo> pmsSkuInfoList = new ArrayList<>();
+
+        pmsSkuInfoList = skuService.getAllSku();
+
+        // 转化为es的数据结构
+        List<PmsSearchSkuInfo> pmsSearchSkuInfos = new ArrayList<>();
+
+        for (PmsSkuInfo pmsSkuInfo : pmsSkuInfoList){
+            PmsSearchSkuInfo pmsSearchSkuInfo = new PmsSearchSkuInfo();
+            BeanUtils.copyProperties(pmsSkuInfo, pmsSearchSkuInfo);
+            pmsSearchSkuInfo.setId(Long.parseLong(pmsSkuInfo.getId()));
+            pmsSearchSkuInfos.add(pmsSearchSkuInfo);
+        }
+        // 导入es
+        for (PmsSearchSkuInfo pmsSearchSkuInfo : pmsSearchSkuInfos) {
+            Index put = new Index.Builder(pmsSearchSkuInfo).index("gmall0105").type("PmsSkuInfo").id(pmsSearchSkuInfo.getId() + "").build();
+
+            jestClient.execute(put);
+        }
+    }
+
+    public void get() throws IOException {
 
         // jest的dsl工具
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -82,26 +109,5 @@ public class GmallSearchServiceApplicationTests {
         }
 
         System.out.println(pmsSearchSkuInfos.size());
-    }
-
-    public void put() throws IOException {
-        // 查询mysql数据
-        List<PmsSkuInfo> pmsSkuInfoList = new ArrayList<>();
-
-        pmsSkuInfoList = skuService.getAllSku();
-
-        // 转化为es的数据结构
-        List<PmsSearchSkuInfo> pmsSearchSkuInfos = new ArrayList<>();
-
-        for (PmsSkuInfo pmsSkuInfo : pmsSkuInfoList){
-            PmsSearchSkuInfo pmsSearchSkuInfo = new PmsSearchSkuInfo();
-            BeanUtils.copyProperties(pmsSkuInfo, pmsSearchSkuInfo);
-            pmsSearchSkuInfos.add(pmsSearchSkuInfo);
-        }
-        // 导入es
-        for (PmsSearchSkuInfo pmsSearchSkuInfo : pmsSearchSkuInfos) {
-            Index put = new Index.Builder(pmsSearchSkuInfo).index("gmall0105").type("PmsSkuInfo").id(pmsSearchSkuInfo.getId()).build();
-            jestClient.execute(put);
-        }
     }
 }

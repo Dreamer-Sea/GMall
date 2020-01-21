@@ -1,12 +1,13 @@
 package com.example.gmall.bean;
 
 import javax.persistence.Id;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
-public class PmsSearchSkuInfo {
+public class PmsSearchSkuInfo implements Serializable {
     @Id
-    private String id;
+    private long id;
     private String skuName;
     private String skuDesc;
     private String catalog3Id;
@@ -16,11 +17,11 @@ public class PmsSearchSkuInfo {
     private String productId;
     private List<PmsSkuAttrValue> skuAttrValueList;
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
