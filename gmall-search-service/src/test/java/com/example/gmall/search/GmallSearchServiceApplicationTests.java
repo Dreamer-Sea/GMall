@@ -6,6 +6,12 @@ import com.example.gmall.bean.PmsSkuInfo;
 import com.example.gmall.service.SkuService;
 import io.searchbox.client.JestClient;
 import io.searchbox.core.Index;
+import io.searchbox.core.Search;
+import io.searchbox.core.SearchResult;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MatchQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.BeanUtils;
@@ -30,10 +36,55 @@ public class GmallSearchServiceApplicationTests {
     @Test
     public void contextLoads() throws IOException {
 
+        // jest的dsl工具
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
+        // bool
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+
+        // filter
+        TermQueryBuilder termQueryBuilder = new TermQueryBuilder("skuAttrValueList.valueId", "43");
+        boolQueryBuilder.filter(termQueryBuilder);
+
+        // must
+        MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("skuName", "华为");
+        boolQueryBuilder.must(matchQueryBuilder);
+
+        // query
+        searchSourceBuilder.query(boolQueryBuilder);
+
+        // from
+        searchSourceBuilder.from(0);
+
+        // size
+        searchSourceBuilder.size(20);
+
+        // highlight
+        searchSourceBuilder.highlight(null);
+
+        String dslStr = searchSourceBuilder.toString();
+
+        System.out.println(dslStr);
+
+        // 用api执行复杂查询
+        List<PmsSearchSkuInfo> pmsSearchSkuInfos = new ArrayList<>();
+
+        Search search = new Search.Builder(searchSourceBuilder.toString()).addIndex("gmall0105").addType("PmsSkuInfo").build();
+
+        SearchResult execute = jestClient.execute(search);
+
+        List<SearchResult.Hit<PmsSearchSkuInfo, Void>> hits = execute.getHits(PmsSearchSkuInfo.class);
+
+        for (SearchResult.Hit<PmsSearchSkuInfo, Void> hit : hits) {
+            PmsSearchSkuInfo source = hit.source;
+
+            pmsSearchSkuInfos.add(source);
+        }
+
+        System.out.println(pmsSearchSkuInfos.size());
     }
 
-    public void put(){
+    public void put() throws IOException {
         // 查询mysql数据
         List<PmsSkuInfo> pmsSkuInfoList = new ArrayList<>();
 
