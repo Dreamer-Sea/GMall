@@ -41,7 +41,7 @@ public class PmsUploadUtil {
             int i = originalFilename.lastIndexOf(".");
             String extName = originalFilename.substring(++i);
 
-            String[] uploadInfos = uploadInfos = storageClient.upload_file(bytes, "jpg", null);
+            String[] uploadInfos = storageClient.upload_file(bytes, extName, null);
 
             for (String uploadInfo : uploadInfos) {
                 imgUrl += "/" + uploadInfo;

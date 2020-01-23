@@ -20,7 +20,7 @@ public class SearchController {
     @Reference
     AttrService attrService;
 
-    @RequestMapping("list")
+    @RequestMapping("list.html")
     public String list(PmsSearchParam pmsSearchParam, ModelMap modelMap){
         // 调用搜索服务，返回搜索结果
         List<PmsSearchSkuInfo> pmsSearchSkuInfos = searchService.list(pmsSearchParam);
