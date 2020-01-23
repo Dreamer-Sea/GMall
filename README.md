@@ -58,4 +58,12 @@ index.js 前端的服务器端口。
 
 ## gmall-search-service
 搜索服务的后台
+端口号8073
+
+## gmall-cart-web
+购物车服务的前台
+端口号8084
+
+## gmall-cart-service
+购物车服务的后台
 端口号8074
