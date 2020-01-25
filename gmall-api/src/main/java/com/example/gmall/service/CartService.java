@@ -15,4 +15,6 @@ public interface CartService {
     void flushCartCache(String memberId);
 
     List<OmsCartItem> cartList(String userId);
+
+    void checkCart(OmsCartItem omsCartItem);
 }

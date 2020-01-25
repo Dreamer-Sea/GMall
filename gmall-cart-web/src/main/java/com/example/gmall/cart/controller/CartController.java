@@ -28,15 +28,33 @@ public class CartController {
     @Reference
     CartService cartService;
 
-    @RequestMapping("cartList")
+    @RequestMapping("checkCart")
+    public String checkCart(String isChecked, String skuId, HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
+
+        String memberId = "1";
+
+        // 调用服务，修改状态
+        OmsCartItem omsCartItem = new OmsCartItem();
+        omsCartItem.setMemberId(memberId);
+        omsCartItem.setProductSkuId(skuId);
+        omsCartItem.setIsChecked(isChecked);
+        cartService.checkCart(omsCartItem);
+
+        // 将最新的数据从缓存中查出，渲染给内嵌页
+        List<OmsCartItem> omsCartItems = cartService.cartList(memberId);
+        modelMap.put("cartList", omsCartItems);
+        return "cartListInner";
+    }
+
+        @RequestMapping("cartList")
     public String cartList(HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
 
         List<OmsCartItem> omsCartItems = new ArrayList<>();
-        String userId = "1";
+        String memberId = "1";
 
-        if (StringUtils.isNotBlank(userId)){
+        if (StringUtils.isNotBlank(memberId)){
             // 已经登录查询db
-            omsCartItems = cartService.cartList(userId);
+            omsCartItems = cartService.cartList(memberId);
         }else {
             // 没有登录查询cookie
             String cartListCookie = CookieUtil.getCookieValue(request, "cartListCookie", true);
