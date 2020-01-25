@@ -52,7 +52,7 @@
                 <input type="button" value="搜索" class="one_right_btn">
             </div>
         </div>
-        <div class="one_search_load"   th:if="${userId}==null" >
+        <div class="one_search_load"   th:if="${memberId}==null" >
             <img src="/img/shop_07.jpg" class="one_load_wraing">
             <span>您还没有登录！登录后购物车的商品将保存到您账号中</span>
             <a href="#"><input type="button" onclick="login()" value="立即登录" class="one_load_btn"></a>
@@ -86,22 +86,22 @@
 
                     <div>
                         <ol>
-                            <li><input type="checkbox"   class="check"  th:value="${cartInfo.skuId}"  onchange="checkSku(this)" th:checked="(${cartInfo.isChecked}==1)?'true':'false'" /></li>
+                            <li><input type="checkbox"   class="check"  th:value="${cartInfo.productId}"  onchange="checkSku(this)" th:checked="(${cartInfo.isChecked}==1)?'true':'false'" /></li>
                             <li>
-                                <dt><img  th:src="${cartInfo.imgUrl}"  src="img\shop1.jpg" alt=""></dt>
-                                <dd  th:onclick="'toItem('+${cartInfo.skuId}+')'">
+                                <dt><img  th:src="${cartInfo.productPic}"  src="img\shop1.jpg" alt=""></dt>
+                                <dd  th:onclick="'toItem('+${cartInfo.productId}+')'">
                                     <p>
-                                        <span th:text="${cartInfo.skuName}" >TCL 55A950C 55英寸32核</span>
+                                        <span th:text="${cartInfo.productName}" >TCL 55A950C 55英寸32核</span>
                                     </p>
                                 </dd>
                             </li>
                             <li>
-                                <p class="dj" th:text="'￥'+${cartInfo.skuPrice}" >4599.00</p>
+                                <p class="dj" th:text="'￥'+${cartInfo.price}" >4599.00</p>
                             </li>
                             <li>
                                 <p>
                                     <span>-</span>
-                                    <span th:text="${cartInfo.skuNum}">5</span>
+                                    <span th:text="${cartInfo.quantity}">5</span>
                                     <span>+</span>
                                 </p>
                             </li>
@@ -268,8 +268,8 @@
      function toTrade(){
          window.location.href="http://cart.gmall.com:8087/toTrade";
     }
-    function toItem(skuId) {
-        window.location.href="http://item.gmall.com:8084/"+skuId+".html";
+    function toItem(productId) {
+        window.location.href="http://item.gmall.com:8084/"+productId+".html";
     }
 
     function login(){
@@ -278,13 +278,13 @@
     }
 
     function checkSku( chkbox){
-       var skuId= $(chkbox).attr("value");
+       var productId= $(chkbox).attr("value");
        var checked=$(chkbox).prop("checked");
        var isCheckedFlag="0";
        if(checked){
            isCheckedFlag="1";
        }
-        var param="isChecked="+isCheckedFlag+"&"+"skuId="+skuId;
+        var param="isChecked="+isCheckedFlag+"&"+"productId="+productId;
         $.post("checkCart",param,function (data) {
             sumSumPrice();
         });

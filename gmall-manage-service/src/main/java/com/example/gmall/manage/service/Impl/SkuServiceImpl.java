@@ -68,7 +68,6 @@ public class SkuServiceImpl implements SkuService {
     public PmsSkuInfo getSkuByIdFromDb(String skuId){
         PmsSkuInfo pmsSkuInfo = new PmsSkuInfo();
         pmsSkuInfo.setId(skuId);
-
         PmsSkuInfo skuInfo = pmsSkuInfoMapper.selectOne(pmsSkuInfo);
 
         PmsSkuImage pmsSkuImage = new PmsSkuImage();
