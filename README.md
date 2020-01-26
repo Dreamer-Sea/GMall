@@ -67,3 +67,7 @@ index.js 前端的服务器端口。
 ## gmall-cart-service
 购物车服务的后台
 端口号8074
+
+## gmall-passport-web
+用户认证中心
+端口号8085
