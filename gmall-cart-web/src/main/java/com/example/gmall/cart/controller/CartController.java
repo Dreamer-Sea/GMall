@@ -2,6 +2,7 @@ package com.example.gmall.cart.controller;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fastjson.JSON;
+import com.example.gmall.annotations.LoginRequired;
 import com.example.gmall.bean.OmsCartItem;
 import com.example.gmall.bean.PmsSkuInfo;
 import com.example.gmall.service.CartService;
@@ -28,7 +29,18 @@ public class CartController {
     @Reference
     CartService cartService;
 
+    @RequestMapping("toTrade")
+    @LoginRequired(loginSuccess = true)
+    public String toTrade(HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
+
+        String memberId = (String) request.getAttribute("memberId");
+        String nickname = (String) request.getAttribute("nickname");
+
+        return "toTrade";
+    }
+
     @RequestMapping("checkCart")
+    @LoginRequired(loginSuccess = false)
     public String checkCart(String isChecked, String skuId, HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
 
         String memberId = "1";
@@ -116,6 +128,7 @@ public class CartController {
 
         // 判断用户是否登录
         String memberId = "1";
+//        request.getAttribute("memberId");
 
         if (StringUtils.isBlank(memberId)){
             // 用户没有登录
