@@ -43,10 +43,27 @@ public class CartController {
         // 将最新的数据从缓存中查出，渲染给内嵌页
         List<OmsCartItem> omsCartItems = cartService.cartList(memberId);
         modelMap.put("cartList", omsCartItems);
+
+        // 被勾选的商品的总额
+        BigDecimal totalAmount = getTotalAmount(omsCartItems);
+        modelMap.put("totalAmount", totalAmount);
         return "cartListInner";
     }
 
-        @RequestMapping("cartList")
+    private BigDecimal getTotalAmount(List<OmsCartItem> omsCartItems) {
+        BigDecimal totalAmount = new BigDecimal("0");
+
+        for (OmsCartItem omsCartItem : omsCartItems) {
+            if (omsCartItem.getIsChecked().equals("1")){
+                BigDecimal totalPrice = omsCartItem.getTotalPrice();
+                totalAmount = totalAmount.add(totalPrice);
+            }
+        }
+
+        return totalAmount;
+    }
+
+    @RequestMapping("cartList")
     public String cartList(HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
 
         List<OmsCartItem> omsCartItems = new ArrayList<>();
@@ -66,8 +83,12 @@ public class CartController {
         for (OmsCartItem omsCartItem : omsCartItems) {
             omsCartItem.setTotalPrice(omsCartItem.getPrice().multiply(omsCartItem.getQuantity()));
         }
-        
+
         modelMap.put("cartList", omsCartItems);
+
+        BigDecimal totalAmount = getTotalAmount(omsCartItems);
+        modelMap.put("totalAmount", totalAmount);
+
         return "cartList";
     }
 
