@@ -1,13 +1,25 @@
 package com.example.gmall.passport.controller;
 
+import com.alibaba.dubbo.config.annotation.Reference;
+import com.example.gmall.annotations.LoginRequired;
 import com.example.gmall.bean.UmsMember;
+import com.example.gmall.service.UserService;
+import com.example.gmall.util.JwtUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
+
 @Controller
 public class PassportController {
+
+    @Reference
+    UserService userService;
 
     @RequestMapping("verify")
     @ResponseBody
@@ -20,14 +32,47 @@ public class PassportController {
 
     @RequestMapping("login")
     @ResponseBody
-    public String login(UmsMember umsMember){
+    public String login(UmsMember umsMember, HttpServletRequest request){
+
+        String token = "";
 
         // 调用用户服务验证用户名和密码
+        UmsMember umsMemberLogin = userService.login(umsMember);
 
-        return "token";
+        if (umsMemberLogin != null){
+            // 登录成功
+
+            // 用jwt制作token
+            String memberId = umsMemberLogin.getId();
+            String nickname = umsMemberLogin.getNickname();
+            Map<String, Object> userMap = new HashMap<>();
+            userMap.put("memberId", memberId);
+            userMap.put("nickname", nickname);
+
+            String ip = request.getHeader("x-forwarded-for"); // 通过nginx转发的客户端ip
+            if (StringUtils.isBlank(ip)){
+                ip = request.getRemoteAddr(); // 从request中获得ip
+                if (StringUtils.isBlank(ip)){
+                    ip = "127.0.0.1";
+                }
+            }
+
+            // 按照设计的算法对参数进行加密后，生成token
+            token = JwtUtil.encode("2019gmall0105", userMap, ip);
+
+            // 将token存入redis一份
+            userService.addUserToken(token, memberId);
+
+        }else{
+            // 登录失败
+            token = "fail";
+        }
+
+        return token;
     }
 
     @RequestMapping("index")
+    @LoginRequired(loginSuccess = false)
     public String index(String ReturnUrl, ModelMap map){
 
         map.put("ReturnUrl", ReturnUrl);
