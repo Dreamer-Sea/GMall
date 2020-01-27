@@ -43,7 +43,8 @@ public class CartController {
     @LoginRequired(loginSuccess = false)
     public String checkCart(String isChecked, String skuId, HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
 
-        String memberId = "1";
+        String memberId = (String) request.getAttribute("memberId");
+        String nickname = (String) request.getAttribute("nickname");
 
         // 调用服务，修改状态
         OmsCartItem omsCartItem = new OmsCartItem();
@@ -79,7 +80,9 @@ public class CartController {
     public String cartList(HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
 
         List<OmsCartItem> omsCartItems = new ArrayList<>();
-        String memberId = "1";
+
+        String memberId = (String) request.getAttribute("memberId");
+        String nickname = (String) request.getAttribute("nickname");
 
         if (StringUtils.isNotBlank(memberId)){
             // 已经登录查询db
@@ -127,7 +130,8 @@ public class CartController {
         omsCartItem.setQuantity(new BigDecimal(quantity));
 
         // 判断用户是否登录
-        String memberId = "1";
+        String memberId = (String) request.getAttribute("memberId");
+        String nickname = (String) request.getAttribute("nickname");
 //        request.getAttribute("memberId");
 
         if (StringUtils.isBlank(memberId)){
