@@ -69,12 +69,12 @@ public class PassportController {
             umsMember.setGender("0");
         }
 
-        UmsMember umsCheck = new UmsMember();
+        UmsMember umsCheck = new UmsMember(); // RPC的主键返回策略失效
         umsCheck.setSourceUid(umsMember.getSourceUid());
         UmsMember umsMemberCheck = userService.checkOauthUser(umsCheck);
 
         if (umsMemberCheck == null){
-            userService.addOauthUser(umsMember);
+            umsMember = userService.addOauthUser(umsMember);
         }else{
             umsMember = umsCheck;
         }

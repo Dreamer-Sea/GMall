@@ -6,6 +6,7 @@ import com.example.gmall.bean.OmsCartItem;
 import com.example.gmall.bean.OmsOrderItem;
 import com.example.gmall.bean.UmsMemberReceiveAddress;
 import com.example.gmall.service.CartService;
+import com.example.gmall.service.OrderService;
 import com.example.gmall.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -25,7 +26,36 @@ public class OrderController {
     @Reference
     UserService userService;
 
-    @RequestMapping("toTrade")
+    @Reference
+    OrderService orderService;
+
+    @RequestMapping("submitOrder")
+    @LoginRequired(loginSuccess = true)
+    public String submitOrder(String receiveAddressId, BigDecimal totalAmount, String tradeCode, HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
+
+        String memberId = (String) request.getAttribute("memberId");
+        String nickname = (String) request.getAttribute("nickname");
+
+        // 检查交易码
+        String success = orderService.checkTradeCode(memberId, tradeCode);
+
+        if (success.equals("success")){
+
+        }else{
+            return "fail";
+        }
+
+        // 根据用户id获得要购买的商品列表(购物车)
+
+        // 将订单和订单详情写入数据库
+        // 删除购物车的对应商品
+
+
+        // 重定向到支付系统
+        return null;
+    }
+
+        @RequestMapping("toTrade")
     @LoginRequired(loginSuccess = true)
     public String toTrade(HttpServletRequest request, HttpServletResponse response, ModelMap modelMap) {
 
@@ -54,6 +84,10 @@ public class OrderController {
         modelMap.put("omsOrderItems", omsOrderItems);
         modelMap.put("totalAmount", totalAmount);
         modelMap.put("receiveAddressByMemberId", receiveAddressByMemberId);
+
+        // 生成交易码，为了在提交订单时做交易码校验
+        String tradeCode = orderService.genTradeCode(memberId);
+        modelMap.put("tradeCode", tradeCode);
 
         return "trade";
     }

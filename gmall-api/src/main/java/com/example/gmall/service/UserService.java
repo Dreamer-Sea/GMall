@@ -13,7 +13,7 @@ public interface UserService {
 
     void addUserToken(String token, String memberId);
 
-    void addOauthUser(UmsMember umsMember);
+    UmsMember addOauthUser(UmsMember umsMember);
 
     UmsMember checkOauthUser(UmsMember umsCheck);
 
