@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +39,10 @@ public class OrderController {
         List<OmsCartItem> omsCartItems = cartService.cartList(memberId);
 
         List<OmsOrderItem> omsOrderItems = new ArrayList<>();
+        BigDecimal totalAmount = new BigDecimal("0");
         for (OmsCartItem omsCartItem : omsCartItems) {
             if ("1".equals(omsCartItem.getIsChecked())){
+                totalAmount = totalAmount.add(omsCartItem.getPrice().multiply(omsCartItem.getQuantity()));
                 OmsOrderItem omsOrderItem = new OmsOrderItem();
                 omsOrderItem.setProductName(omsCartItem.getProductName());
                 omsOrderItem.setProductPic(omsCartItem.getProductPic());
@@ -49,6 +52,8 @@ public class OrderController {
         }
 
         modelMap.put("omsOrderItems", omsOrderItems);
+        modelMap.put("totalAmount", totalAmount);
+        modelMap.put("receiveAddressByMemberId", receiveAddressByMemberId);
 
         return "trade";
     }
