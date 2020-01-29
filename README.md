@@ -71,3 +71,11 @@ index.js 前端的服务器端口。
 ## gmall-passport-web
 用户认证中心
 端口号8085
+
+## gmall-order-service
+订单服务的后台
+端口号8076
+
+## gmall-order-web
+订单服务的前台
+端口号8086

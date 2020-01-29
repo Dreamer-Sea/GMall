@@ -115,7 +115,7 @@ public class PassportController {
         if (umsMemberLogin != null){
             // 登录成功
             // 用jwt制作token
-            token = generateJWTToken(umsMember, request);
+            token = generateJWTToken(umsMemberLogin, request);
 
             // 将token存入redis一份
             userService.addUserToken(token, umsMemberLogin.getId());
