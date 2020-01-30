@@ -18,4 +18,6 @@ public interface UserService {
     UmsMember checkOauthUser(UmsMember umsCheck);
 
     UmsMember getOauthUser(UmsMember umsMemberCheck);
+
+    UmsMemberReceiveAddress getReceiveAddressById(String receiveAddressId);
 }
