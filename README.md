@@ -79,3 +79,6 @@ index.js 前端的服务器端口。
 ## gmall-order-web
 订单服务的前台
 端口号8086
+
+## gmall-payment
+端口号8087
