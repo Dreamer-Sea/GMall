@@ -13,26 +13,26 @@ import javax.jms.Session;
 public class ActiveMQConfig {
 
     @Value("${spring.activemq.broker-url:disabled}")
-    String brokerURL ;
+    String brokerURL;
 
     @Value("${activemq.listener.enable:disabled}")
     String listenerEnable;
 
     @Bean
-    public    ActiveMQUtil   getActiveMQUtil() throws JMSException {
-        if(brokerURL.equals("disabled")){
+    public ActiveMQUtil getActiveMQUtil() throws JMSException {
+        if (brokerURL.equals("disabled")) {
             return null;
         }
-        ActiveMQUtil activeMQUtil=new ActiveMQUtil();
+        ActiveMQUtil activeMQUtil = new ActiveMQUtil();
         activeMQUtil.init(brokerURL);
-        return  activeMQUtil;
+        return activeMQUtil;
     }
 
     //定义一个消息监听器连接工厂，这里定义的是点对点模式的监听器连接工厂
     @Bean(name = "jmsQueueListener")
-    public DefaultJmsListenerContainerFactory jmsQueueListenerContainerFactory(ActiveMQConnectionFactory activeMQConnectionFactory ) {
+    public DefaultJmsListenerContainerFactory jmsQueueListenerContainerFactory(ActiveMQConnectionFactory activeMQConnectionFactory) {
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
-        if(!listenerEnable.equals("true")){
+        if (!listenerEnable.equals("true")) {
             return null;
         }
 
@@ -41,21 +41,21 @@ public class ActiveMQConfig {
         factory.setConcurrency("5");
 
         //重连间隔时间
-       factory.setRecoveryInterval(5000L);
-       factory.setSessionTransacted(false);
-       factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
+        factory.setRecoveryInterval(5000L);
+        factory.setSessionTransacted(false);
+        factory.setSessionAcknowledgeMode(Session.CLIENT_ACKNOWLEDGE);
 
         return factory;
     }
 
 
     @Bean
-    public ActiveMQConnectionFactory activeMQConnectionFactory ( ){
+    public ActiveMQConnectionFactory activeMQConnectionFactory() {
 /*        if((url==null||url.equals(""))&&!brokerURL.equals("disabled")){
             url=brokerURL;
         }*/
         ActiveMQConnectionFactory activeMQConnectionFactory =
-                new ActiveMQConnectionFactory(  brokerURL);
+                new ActiveMQConnectionFactory(brokerURL);
         return activeMQConnectionFactory;
     }
 

@@ -2,16 +2,17 @@ package com.example.gmall.mq;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.pool.PooledConnectionFactory;
+import org.springframework.context.annotation.Bean;
 
 import javax.jms.ConnectionFactory;
 
 public class ActiveMQUtil {
-    PooledConnectionFactory pooledConnectionFactory=null;
+    PooledConnectionFactory pooledConnectionFactory = null;
 
     public ConnectionFactory init(String brokerUrl) {
         ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(brokerUrl);
-         //加入连接池
-        pooledConnectionFactory=new PooledConnectionFactory(factory);
+        //加入连接池
+        pooledConnectionFactory = new PooledConnectionFactory(factory);
         //出现异常时重新连接
         pooledConnectionFactory.setReconnectOnException(true);
         //
@@ -20,7 +21,7 @@ public class ActiveMQUtil {
         return pooledConnectionFactory;
     }
 
-    public ConnectionFactory getConnectionFactory(){
+    public ConnectionFactory getConnectionFactory() {
         return pooledConnectionFactory;
     }
 }
