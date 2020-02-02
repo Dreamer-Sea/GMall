@@ -61,8 +61,6 @@ public class PaymentController {
             paymentService.updatePayment(paymentInfo);
         }
 
-        // 支付成功后，引起的系统服务-》订单服务-》库存服务-》物流
-
         // 更新用户的支付状态
         return "finish";
     }
@@ -90,7 +88,7 @@ public class PaymentController {
         Map<String, Object> map = new HashMap<>();
         map.put("out_trade_no", outTradeNo);
         map.put("product_code", "FAST_INSTANT_TRADE_PAY");
-        map.put("total_amount", totalAmount);
+        map.put("total_amount", 0.01);
         map.put("subject", "超感光徕卡");
 
         String param = JSON.toJSONString(map);
