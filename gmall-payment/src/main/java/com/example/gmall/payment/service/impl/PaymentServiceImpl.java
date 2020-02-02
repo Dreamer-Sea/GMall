@@ -5,6 +5,7 @@ import com.example.gmall.bean.PaymentInfo;
 import com.example.gmall.mq.ActiveMQUtil;
 import com.example.gmall.payment.mapper.PaymentInfoMapper;
 import com.example.gmall.service.PaymentService;
+import org.apache.activemq.ScheduledMessage;
 import org.apache.activemq.command.ActiveMQMapMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
@@ -69,6 +70,36 @@ public class PaymentServiceImpl implements PaymentService {
                 connection.close();
             } catch (JMSException ex) {
                 ex.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public void sendDelayPaymentResultCheckQueue(String outTradeNo) {
+        Connection connection = null;
+        Session session = null;
+        try {
+            connection = activeMQUtil.getConnectionFactory().createConnection();
+            session = connection.createSession(true, Session.SESSION_TRANSACTED);
+            Queue payment_check_queue = session.createQueue("PAYMENT_CHECK_QUEUE");
+            MessageProducer producer = session.createProducer(payment_check_queue);
+            MapMessage mapMessage = new ActiveMQMapMessage();
+            mapMessage.setString("out_trade_no", outTradeNo);
+            // 为消息加入延迟的时间
+            mapMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, 1000*3);
+            producer.send(mapMessage);
+            session.commit();
+        }catch (Exception e){
+            try {
+                session.rollback();
+            } catch (JMSException ex) {
+                ex.printStackTrace();
+            }
+        }finally {
+            try {
+                connection.close();
+            } catch (JMSException e) {
+                e.printStackTrace();
             }
         }
     }

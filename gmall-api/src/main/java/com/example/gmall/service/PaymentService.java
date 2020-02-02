@@ -6,4 +6,6 @@ public interface PaymentService {
     void savePaymentInfo(PaymentInfo paymentInfo);
 
     void updatePayment(PaymentInfo paymentInfo);
+
+    void sendDelayPaymentResultCheckQueue(String outTradeNo);
 }

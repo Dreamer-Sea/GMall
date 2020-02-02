@@ -49,7 +49,7 @@ public class PaymentController {
         String subject = request.getParameter("subject");
         String call_back_content = request.getQueryString();
 
-        if (StringUtils.isNotBlank(sign)){
+        if (StringUtils.isNotBlank(sign)) {
             // 验签成功
             PaymentInfo paymentInfo = new PaymentInfo();
             paymentInfo.setOrderSn(out_trade_no);
@@ -113,15 +113,16 @@ public class PaymentController {
         paymentInfo.setTotalAmount(totalAmount);
         paymentService.savePaymentInfo(paymentInfo);
 
-
+        // 向消息中间件发送一个检查支付状态（支付服务消费）的延迟消息队列
+        paymentService.sendDelayPaymentResultCheckQueue(outTradeNo);
 
         // 提交请求到支付宝
         return form;
     }
 
-        @RequestMapping("index")
+    @RequestMapping("index")
     @LoginRequired(loginSuccess = true)
-    public String index(String outTradeNo, BigDecimal totalAmount, HttpServletRequest request, ModelMap modelMap){
+    public String index(String outTradeNo, BigDecimal totalAmount, HttpServletRequest request, ModelMap modelMap) {
 
         String memberId = (String) request.getAttribute("memberId");
         String nickname = (String) request.getAttribute("nickname");
