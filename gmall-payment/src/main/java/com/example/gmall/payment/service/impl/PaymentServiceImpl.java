@@ -1,6 +1,11 @@
 package com.example.gmall.payment.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
+import com.alipay.api.AlipayApiException;
+import com.alipay.api.AlipayClient;
+import com.alipay.api.request.AlipayTradeQueryRequest;
+import com.alipay.api.response.AlipayTradeQueryResponse;
 import com.example.gmall.bean.PaymentInfo;
 import com.example.gmall.mq.ActiveMQUtil;
 import com.example.gmall.payment.mapper.PaymentInfoMapper;
@@ -11,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
 import javax.jms.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -20,6 +27,9 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Autowired
     ActiveMQUtil activeMQUtil;
+
+    @Autowired
+    AlipayClient alipayClient;
 
     @Override
     public void savePaymentInfo(PaymentInfo paymentInfo) {
@@ -75,32 +85,75 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public void sendDelayPaymentResultCheckQueue(String outTradeNo) {
+    public void sendDelayPaymentResultCheckQueue(String outTradeNo,int count) {
+
         Connection connection = null;
         Session session = null;
         try {
             connection = activeMQUtil.getConnectionFactory().createConnection();
             session = connection.createSession(true, Session.SESSION_TRANSACTED);
-            Queue payment_check_queue = session.createQueue("PAYMENT_CHECK_QUEUE");
-            MessageProducer producer = session.createProducer(payment_check_queue);
-            MapMessage mapMessage = new ActiveMQMapMessage();
-            mapMessage.setString("out_trade_no", outTradeNo);
-            // 为消息加入延迟的时间
-            mapMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, 1000*3);
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+
+        try{
+            Queue payhment_success_queue = session.createQueue("PAYMENT_CHECK_QUEUE");
+            MessageProducer producer = session.createProducer(payhment_success_queue);
+
+            //TextMessage textMessage=new ActiveMQTextMessage();//字符串文本
+
+            MapMessage mapMessage = new ActiveMQMapMessage();// hash结构
+
+            mapMessage.setString("out_trade_no",outTradeNo);
+            mapMessage.setInt("count",count);
+
+            // 为消息加入延迟时间
+            mapMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY,1000*60);
+
             producer.send(mapMessage);
+
             session.commit();
-        }catch (Exception e){
+        }catch (Exception ex){
+            // 消息回滚
             try {
                 session.rollback();
-            } catch (JMSException ex) {
-                ex.printStackTrace();
+            } catch (JMSException e1) {
+                e1.printStackTrace();
             }
         }finally {
             try {
                 connection.close();
-            } catch (JMSException e) {
-                e.printStackTrace();
+            } catch (JMSException e1) {
+                e1.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public Map<String, Object> checkAlipayPayment(String out_trade_no) {
+
+        Map<String, Object> resultMap = new HashMap<>();
+
+        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("out_trade_no", out_trade_no);
+        request.setBizContent(JSON.toJSONString(requestMap));
+        AlipayTradeQueryResponse response = null;
+        try {
+            response = alipayClient.execute(request);
+        } catch (AlipayApiException e){
+            e.printStackTrace();
+        }
+
+        if (response.isSuccess()){
+            System.out.println("有可能交易已创建，调用成功");
+            resultMap.put("out_trade_no", response.getOutTradeNo());
+            resultMap.put("trade_no", response.getTradeNo());
+            resultMap.put("trade_status", response.getTradeStatus());
+        } else {
+            System.out.println("有可能交易未创建，调用失败");
+        }
+
+        return requestMap;
     }
 }
