@@ -1,5 +1,6 @@
 package com.example.gmall.payment.mq;
 
+import com.example.gmall.bean.PaymentInfo;
 import com.example.gmall.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
+import java.util.Date;
 import java.util.Map;
 
 @Component
@@ -32,8 +34,16 @@ public class PaymentServiceMqListener {
             // 根据查询的支付状态结果，判断接下来要进行的操作
             if ("TRADE_SUCCESS".equals(trade_status)) {
                 // 支付成功，更新支付发送支付队列
-                paymentService.updatePayment(null);
+
+                PaymentInfo paymentInfo = new PaymentInfo();
+                paymentInfo.setOrderSn(out_trade_no);
+                paymentInfo.setPaymentStatus("已支付");
+                paymentInfo.setAlipayTradeNo((String) resultMap.get("trade_no"));
+                paymentInfo.setCallbackContent((String) resultMap.get("call_back_content"));
+                paymentInfo.setCallbackTime(new Date());
+
                 System.out.println("已经支付成功，调用支付服务，修改支付信息和发送支付成功的队列");
+                paymentService.updatePayment(paymentInfo);
                 return;
             }
         }

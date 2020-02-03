@@ -12,6 +12,7 @@ import com.example.gmall.payment.mapper.PaymentInfoMapper;
 import com.example.gmall.service.PaymentService;
 import org.apache.activemq.ScheduledMessage;
 import org.apache.activemq.command.ActiveMQMapMessage;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.entity.Example;
 
@@ -38,48 +39,56 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public void updatePayment(PaymentInfo paymentInfo) {
-        String orderSn = paymentInfo.getOrderSn();
+        // 幂等性检查
+        PaymentInfo paymentInfoParam = new PaymentInfo();
+        paymentInfoParam.setOrderSn(paymentInfo.getOrderSn());
+        PaymentInfo paymentInfoResult = paymentInfoMapper.selectOne(paymentInfoParam);
+        if (StringUtils.isNotBlank(paymentInfoResult.getPaymentStatus()) && paymentInfoResult.getPaymentStatus().equals("已支付")){
+            return;
+        }else{
+            String orderSn = paymentInfo.getOrderSn();
 
-        Example e = new Example(PaymentInfo.class);
-        e.createCriteria().andEqualTo("orderSn", orderSn);
+            Example e = new Example(PaymentInfo.class);
+            e.createCriteria().andEqualTo("orderSn", orderSn);
 
-        Connection connection = null;
-        Session session = null;
-        try{
-            connection = activeMQUtil.getConnectionFactory().createConnection();
-            session = connection.createSession(true, Session.SESSION_TRANSACTED);
-        }catch (JMSException jex){
-            jex.printStackTrace();
-        }
-
-        try{
-            paymentInfoMapper.updateByExampleSelective(paymentInfo, e);
-
-            // 支付成功后，引起的系统服务-》订单服务-》库存服务-》物流
-            // 调用MQ发送支付成功的信息
-            Queue payment_success_queue = session.createQueue("PAYMENT_SUCCESS_QUEUE");
-            MessageProducer producer = session.createProducer(payment_success_queue);
-
-            MapMessage mapMessage = new ActiveMQMapMessage();
-
-            mapMessage.setString("out_trade_no", paymentInfo.getOrderSn());
-
-            producer.send(mapMessage);
-
-            session.commit();
-        }catch (Exception ex){
-            // 消息回滚
-            ex.printStackTrace();
-            try {
-                session.rollback();
-            } catch (JMSException exc) {
-                exc.printStackTrace();
+            Connection connection = null;
+            Session session = null;
+            try{
+                connection = activeMQUtil.getConnectionFactory().createConnection();
+                session = connection.createSession(true, Session.SESSION_TRANSACTED);
+            }catch (JMSException jex){
+                jex.printStackTrace();
             }
-        }finally {
-            try {
-                connection.close();
-            } catch (JMSException ex) {
+
+            try{
+                paymentInfoMapper.updateByExampleSelective(paymentInfo, e);
+
+                // 支付成功后，引起的系统服务-》订单服务-》库存服务-》物流
+                // 调用MQ发送支付成功的信息
+                Queue payment_success_queue = session.createQueue("PAYMENT_SUCCESS_QUEUE");
+                MessageProducer producer = session.createProducer(payment_success_queue);
+
+                MapMessage mapMessage = new ActiveMQMapMessage();
+
+                mapMessage.setString("out_trade_no", paymentInfo.getOrderSn());
+
+                producer.send(mapMessage);
+
+                session.commit();
+            }catch (Exception ex){
+                // 消息回滚
                 ex.printStackTrace();
+                try {
+                    session.rollback();
+                } catch (JMSException exc) {
+                    exc.printStackTrace();
+                }
+            }finally {
+                try {
+                    connection.close();
+                } catch (JMSException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -150,6 +159,7 @@ public class PaymentServiceImpl implements PaymentService {
             resultMap.put("out_trade_no", response.getOutTradeNo());
             resultMap.put("trade_no", response.getTradeNo());
             resultMap.put("trade_status", response.getTradeStatus());
+            requestMap.put("call_back_content", response.getMsg());
         } else {
             System.out.println("有可能交易未创建，调用失败");
         }

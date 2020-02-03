@@ -51,13 +51,14 @@ public class PaymentController {
 
         if (StringUtils.isNotBlank(sign)) {
             // 验签成功
+            // 更新用户的支付状态
             PaymentInfo paymentInfo = new PaymentInfo();
             paymentInfo.setOrderSn(out_trade_no);
             paymentInfo.setPaymentStatus("已支付");
             paymentInfo.setAlipayTradeNo(trade_no);
             paymentInfo.setCallbackContent(call_back_content);
             paymentInfo.setCallbackTime(new Date());
-            // 更新用户的支付状态
+
             paymentService.updatePayment(paymentInfo);
         }
 
