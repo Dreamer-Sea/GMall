@@ -2,6 +2,7 @@ package com.example.gmall.order.service.impl;
 
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.example.gmall.bean.OmsOrder;
 import com.example.gmall.bean.OmsOrderItem;
 import com.example.gmall.mq.ActiveMQUtil;
@@ -11,6 +12,7 @@ import com.example.gmall.service.CartService;
 import com.example.gmall.service.OrderService;
 import com.example.gmall.util.RedisUtil;
 import org.apache.activemq.command.ActiveMQMapMessage;
+import org.apache.activemq.command.ActiveMQTextMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import redis.clients.jedis.Jedis;
@@ -124,9 +126,22 @@ public class OrderServiceImpl implements OrderService {
             omsOrderMapper.updateByExampleSelective(omsOrderUpdate, e);
             Queue order_pay_queue = session.createQueue("ORDER_PAY_QUEUE");
             MessageProducer producer = session.createProducer(order_pay_queue);
-            MapMessage mapMessage = new ActiveMQMapMessage();
+//            MapMessage mapMessage = new ActiveMQMapMessage();
+            TextMessage textMessage = new ActiveMQTextMessage();
 
-            producer.send(mapMessage);
+            // 查询订单的对象，转化成json字符串，存入ORDER_PAY_QUEUE的消息队列
+            OmsOrder omsOrderParam = new OmsOrder();
+            omsOrderParam.setOrderSn(omsOrder.getOrderSn());
+            OmsOrder omsOrderResponse = omsOrderMapper.selectOne(omsOrderParam);
+
+            OmsOrderItem omsOrderItemParam = new OmsOrderItem();
+            omsOrderItemParam.setOrderSn(omsOrderParam.getOrderSn());
+            List<OmsOrderItem> select = omsOrderItemMapper.select(omsOrderItemParam);
+            omsOrderResponse.setOmsOrders(select);
+            textMessage.setText(JSON.toJSONString(omsOrderResponse));
+
+            omsOrderMapper.updateByExampleSelective(omsOrderUpdate, e);
+            producer.send(textMessage);
             session.commit();
         }catch (Exception ex){
             ex.printStackTrace();

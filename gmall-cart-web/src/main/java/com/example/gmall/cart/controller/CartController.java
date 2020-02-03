@@ -118,6 +118,7 @@ public class CartController {
         omsCartItem.setProductSkuCode("11111111111");
         omsCartItem.setProductSkuId(skuId);
         omsCartItem.setQuantity(new BigDecimal(quantity));
+        omsCartItem.setIsChecked("1");
 
         // 判断用户是否登录
         String memberId = (String) request.getAttribute("memberId");
