@@ -17,6 +17,7 @@
         <module name="gmall-cart-service" />
         <module name="gmall-api" />
         <module name="gmall-manage-service" />
+        <module name="gmall-seckill" />
         <module name="gmall-cart-web" />
         <module name="gmall-payment" />
         <module name="gmall-user-service" />
@@ -45,11 +46,17 @@
       <module name="gmall-redission-test" target="1.8" />
       <module name="gmall-search-service" target="1.8" />
       <module name="gmall-search-web" target="1.8" />
+      <module name="gmall-seckill" target="1.8" />
       <module name="gmall-service-util" target="1.8" />
       <module name="gmall-user" target="1.8" />
       <module name="gmall-user-service" target="1.8" />
       <module name="gmall-web-util" target="1.8" />
       <module name="gware-manage" target="1.8" />
     </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="gmall-seckill" options="" />
+    </option>
   </component>
 </project>
